@@ -1175,14 +1175,17 @@ class AxiLiteBus(Bus):
             ) + "\n")
         return bus
 
-    def to_axi(self, context, name, iw=0, uw=0, inst_name=None, to=None):
+    def to_axi(self, context, name, iw=0, uw=0, inst_name=None, to=None, fr=None):
         # Generate the new bus.
         if to is None:
-            bus = AxiBus(self.aw, self.dw, iw, uw)
-            bus.name = name
-            bus.name_suffix = None
+            bus = AxiBus(self.clk, self.rst, self.aw, self.dw, iw, uw, name)
         else:
             bus = to
+
+        if fr is None:
+            bus_in = self
+        else:
+            bus_in = AxiLiteBus(self.clk, self.rst, self.aw, self.dw, name=fr)
 
         # Check bus properties.
         assert (bus.clk == self.clk)
@@ -1195,7 +1198,7 @@ class AxiLiteBus(Bus):
         tpl = templates.get_template("solder.axi_lite_to_axi.sv.tpl")
         context.write(
             tpl.render_unicode(
-                bus_in=self,
+                bus_in=bus_in,
                 bus_out=bus,
                 name=inst_name or "i_{}_pc".format(name),
             ) + "\n")
