@@ -81,13 +81,27 @@ module testharness import occamy_pkg::*; (
     .DataWidth (${bus.dw}),
     .IdWidth (1),
     .UserWidth (1),
-    .req_t (${bus.req_type()}),
-    .rsp_t (${bus.rsp_type()})
+    .axi_req_t (axi_${name}_req_t),
+    .axi_rsp_t (axi_${name}_resp_t)
   ) i_${name}_sim_mem (
     .clk_i,
     .rst_ni,
     .axi_req_i (axi_${name}_req),
-    .axi_rsp_o (axi_${name}_rsp)
+    .axi_rsp_o (axi_${name}_rsp),
+    .mon_w_valid_o (),
+    .mon_w_addr_o (),
+    .mon_w_data_o (),
+    .mon_w_id_o (),
+    .mon_w_user_o (),
+    .mon_w_beat_count_o (),
+    .mon_w_last_o (),
+    .mon_r_valid_o (),
+    .mon_r_addr_o (),
+    .mon_r_data_o (),
+    .mon_r_id_o (),
+    .mon_r_user_o (),
+    .mon_r_beat_count_o (),
+    .mon_r_last_o ()
   );
 </%def>
 
@@ -171,8 +185,8 @@ module testharness import occamy_pkg::*; (
     .hbi_${s}_req_o (),
     .hbi_${s}_rsp_i ('0),
 % endfor
-    .pcie_axi_req_o (pcie_axi_req),
-    .pcie_axi_rsp_i (pcie_axi_rsp),
+    .pcie_axi_req_o (),
+    .pcie_axi_rsp_i ('0),
     .pcie_axi_req_i ('0),
     .pcie_axi_rsp_o ()
   );
