@@ -50,18 +50,18 @@ _start:
 # Expecting:
 # - a0: exit code
 _exit:
-    # Return exit code to host to terminate simulation
+    # Return exit code
     slli      a0, a0, 1
     ori       a0, a0, 1
-    la        t0, tohost
+    la        t0, __ret_addr$
     sw        a0, 0(t0) # (exit code << 1) | 1
     fence
+    # Set EOC
+    la        t0, __eoc_addr$
+    li        t1, 1
+    sw        t1, 0(t0)
+    fence
     wfi
-
-# HTIF sections
-.pushsection .htif,"aw",@progbits;
-.align 6; .global tohost; tohost: .dword 0;
-.align 6; .global fromhost; fromhost: .dword 0;
 
 .section .devicebin,"a",@progbits
 .globl snitch_main
