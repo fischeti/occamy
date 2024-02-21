@@ -109,6 +109,16 @@ VLT_FLAGS += -Wno-SYMRSVDWORD -Wno-BLKLOOPINIT
 VLT_FLAGS += --trace       # Enable VCD dumping
 VLT_FLAGS += --prof-cfuncs # Enable code profiling
 
+#########################
+# DRAMSys configuration #
+#########################
+
+DRAMSYS_LIB ?= $(shell bender path dram_rtl_sim)/dramsys_lib
+VSIM_FLAGS  += -sv_lib $(DRAMSYS_LIB)/libsqlite3
+VSIM_FLAGS  += -sv_lib $(DRAMSYS_LIB)/libsystemc
+VSIM_FLAGS 	+= -sv_lib $(DRAMSYS_LIB)/libDRAMSysLibrary
+VSIM_FLAGS 	+= +DRAMSYS_RES=$(DRAMSYS_LIB)/resources/configs
+
 ###############
 # C testbench #
 ###############
