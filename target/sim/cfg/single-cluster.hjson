@@ -151,6 +151,7 @@
         // We don't need Snitch (core-internal) virtual memory support
         vm_support: false,
         // Memory configuration inputs
+        cluster_base_expose: true,
         sram_cfg_expose: true,
         sram_cfg_fields: {
             ema: 3,

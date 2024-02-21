@@ -150,6 +150,7 @@
         enable_debug: false,
         // We don't need Snitch (core-internal) virtual memory support
         vm_support: false,
+        cluster_base_expose: true,
         // Memory configuration inputs
         sram_cfg_expose: true,
         sram_cfg_fields: {
