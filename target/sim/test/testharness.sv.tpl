@@ -101,13 +101,18 @@ module testharness import occamy_pkg::*; (
   );
 </%def>\
 
-  ////////////////////////////////
-  //   HBM Channels (DRAMSys)   //
-  ////////////////////////////////
+  //////////////////////
+  //   HBM Channels   //
+  //////////////////////
 
 % for i in range(nr_hbm_channels):
-  ${tb_dramsys_ch(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i), 0x80000000 + i * 0x40000000)}
+% if cfg["hbm"]["model"] == "DRAMSys":
+  ${tb_dramsys_ch(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i), cfg["hbm"]["address_0"] + i * cfg["hbm"]["channel_size"])}
+% else:
+  ${tb_memory(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
+% endif
 % endfor
+
 
   /////////////////////
   //   Peripherals   //
