@@ -52,62 +52,66 @@ module testharness import occamy_pkg::*; (
     .axi_req_i  ( ${name}_req  ),
     .axi_resp_o ( ${name}_rsp  )
   );
-</%def>
+</%def>\
+<%def name="tb_memory(bus, name)">
+  ${bus.req_type()} ${name}_req;
+  ${bus.rsp_type()} ${name}_rsp;
 
-<%def name="tb_axi_lite_mem(bus, name, fr_name)">
-  `AXI_TYPEDEF_ALL_CT(${"axi_{}, axi_{}_req_t, axi_{}_resp_t,".format(name, name, name)}
-    ${"logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0], logic [{}:0])\n".format(bus.aw-1, 0, bus.dw-1, bus.dw//8-1, 0)}
-
-  axi_${name}_req_t axi_${name}_req;
-  axi_${name}_resp_t axi_${name}_resp;
-
-  axi_lite_to_axi #(
-      .AxiDataWidth(${bus.dw}),
-      .req_lite_t  (${bus.req_type()}),
-      .resp_lite_t (${bus.rsp_type()}),
-      .axi_req_t   (axi_${name}_req_t),
-      .axi_resp_t  (axi_${name}_resp_t)
-  ) i_axil2axi_${name}_pc (
-      .slv_req_lite_i (${fr_name}_req),
-      .slv_resp_lite_o(${fr_name}_rsp),
-      .slv_aw_cache_i (axi_pkg::CACHE_MODIFIABLE),
-      .slv_ar_cache_i (axi_pkg::CACHE_MODIFIABLE),
-      .mst_req_o      (axi_${name}_req),
-      .mst_resp_i     (axi_${name}_resp)
-  );
-
-  axi_sim_mem #(
+  % if isinstance(bus, solder.AxiBus):
+  tb_memory_axi #(
+    .AxiAddrWidth (${bus.aw}),
+    .AxiDataWidth (${bus.dw}),
+    .AxiIdWidth (${bus.iw}),
+    .AxiUserWidth (${bus.uw + 1}),
+    .ATOPSupport (0),
+  % else:
+  tb_memory_regbus #(
     .AddrWidth (${bus.aw}),
     .DataWidth (${bus.dw}),
-    .IdWidth (1),
-    .UserWidth (1),
-    .axi_req_t (axi_${name}_req_t),
-    .axi_rsp_t (axi_${name}_resp_t)
-  ) i_${name}_sim_mem (
+  % endif
+    .req_t (${bus.req_type()}),
+    .rsp_t (${bus.rsp_type()})
+  ) i_${name}_channel (
     .clk_i,
     .rst_ni,
-    .axi_req_i (axi_${name}_req),
-    .axi_rsp_o (axi_${name}_rsp),
-    .mon_w_valid_o (),
-    .mon_w_addr_o (),
-    .mon_w_data_o (),
-    .mon_w_id_o (),
-    .mon_w_user_o (),
-    .mon_w_beat_count_o (),
-    .mon_w_last_o (),
-    .mon_r_valid_o (),
-    .mon_r_addr_o (),
-    .mon_r_data_o (),
-    .mon_r_id_o (),
-    .mon_r_user_o (),
-    .mon_r_beat_count_o (),
-    .mon_r_last_o ()
+    .req_i (${name}_req),
+    .rsp_o (${name}_rsp)
   );
-</%def>
+</%def>\
+<%def name="tb_memory_no_def(bus, name)">
+  % if isinstance(bus, solder.AxiBus):
+  tb_memory_axi #(
+    .AxiAddrWidth (${bus.aw}),
+    .AxiDataWidth (${bus.dw}),
+    .AxiIdWidth (${bus.iw}),
+    .AxiUserWidth (${bus.uw + 1}),
+    .ATOPSupport (0),
+  % else:
+  tb_memory_regbus #(
+    .AddrWidth (${bus.aw}),
+    .DataWidth (${bus.dw}),
+  % endif
+    .req_t (${bus.req_type()}),
+    .rsp_t (${bus.rsp_type()})
+  ) i_${name}_channel (
+    .clk_i,
+    .rst_ni,
+    .req_i (${name}_req),
+    .rsp_o (${name}_rsp)
+  );
+</%def>\
+
+  ////////////////////////////////
+  //   HBM Channels (DRAMSys)   //
+  ////////////////////////////////
 
 % for i in range(nr_hbm_channels):
   ${tb_dramsys_ch(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i), 0x80000000 + i * 0x40000000)}
 % endfor
+
+  /////////////////////
+  //   Peripherals   //
+  /////////////////////
 
   logic tx, rx;
   axi_lite_a48_d32_req_t axi_lite_bootrom_req;
@@ -119,10 +123,36 @@ module testharness import occamy_pkg::*; (
   axi_lite_a48_d32_rsp_t axi_lite_fll_system_rsp;
   axi_lite_a48_d32_rsp_t axi_lite_fll_periph_rsp;
   axi_lite_a48_d32_rsp_t axi_lite_fll_hbm2e_rsp;
-  ${tb_axi_lite_mem(soc_axi_lite_narrow_periph_xbar.out_bootrom, "bootrom", "axi_lite_bootrom")}
-  ${tb_axi_lite_mem(soc_axi_lite_narrow_periph_xbar.out_fll_system, "fll_system", "axi_lite_fll_system")}
-  ${tb_axi_lite_mem(soc_axi_lite_narrow_periph_xbar.out_fll_periph, "fll_periph", "axi_lite_fll_periph")}
-  ${tb_axi_lite_mem(soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e, "fll_hbm2e", "axi_lite_fll_hbm2e")}
+<% regbus_bootrom = soc_axi_lite_narrow_periph_xbar.out_bootrom.to_reg(context, "bootrom_regbus", fr="axi_lite_bootrom") %>
+<% regbus_fll_system = soc_axi_lite_narrow_periph_xbar.out_fll_system.to_reg(context, "fll_system", fr="axi_lite_fll_system") %>
+<% regbus_fll_periph = soc_axi_lite_narrow_periph_xbar.out_fll_periph.to_reg(context, "fll_periph", fr="axi_lite_fll_periph") %>
+<% regbus_fll_hbm2e = soc_axi_lite_narrow_periph_xbar.out_fll_hbm2e.to_reg(context, "fll_hbm2e", fr="axi_lite_fll_hbm2e") %>
+
+  ${tb_memory(soc_narrow_xbar.out_pcie, "pcie_axi")}
+  ${tb_memory_no_def(regbus_bootrom, "bootrom_regbus")}
+  ${tb_memory_no_def(regbus_fll_system, "fll_system")}
+  ${tb_memory_no_def(regbus_fll_periph, "fll_periph")}
+  ${tb_memory_no_def(regbus_fll_hbm2e, "fll_hbm2e")}
+
+  // Must be the frequency of i_uart0.clk_i in Hz
+  localparam int unsigned UartDPIFreq = 1_000_000_000;
+
+  uartdpi #(
+    .BAUD ('d115_200),
+    // Frequency shouldn't matter since we are sending with the same clock.
+    .FREQ (UartDPIFreq),
+    .NAME("uart0")
+  ) i_uart0 (
+    .clk_i (clk_i),
+    .rst_ni (rst_ni),
+    .tx_o (rx),
+    .rx_i (tx)
+  );
+
+  /////////////
+  //   DUT   //
+  /////////////
+
   occamy_top i_occamy (
     .clk_i,
     .rst_ni,
@@ -185,25 +215,11 @@ module testharness import occamy_pkg::*; (
     .hbi_${s}_req_o (),
     .hbi_${s}_rsp_i ('0),
 % endfor
-    .pcie_axi_req_o (),
-    .pcie_axi_rsp_i ('0),
+    .pcie_axi_req_o (pcie_axi_req),
+    .pcie_axi_rsp_i (pcie_axi_rsp),
     .pcie_axi_req_i ('0),
     .pcie_axi_rsp_o ()
   );
 
-  // Must be the frequency of i_uart0.clk_i in Hz
-  localparam int unsigned UartDPIFreq = 1_000_000_000;
-
-  uartdpi #(
-    .BAUD ('d115_200),
-    // Frequency shouldn't matter since we are sending with the same clock.
-    .FREQ (UartDPIFreq),
-    .NAME("uart0")
-  ) i_uart0 (
-    .clk_i (clk_i),
-    .rst_ni (rst_ni),
-    .tx_o (rx),
-    .rx_i (tx)
-  );
 
 endmodule
