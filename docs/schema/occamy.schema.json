@@ -434,6 +434,15 @@
                     "description": "Number of lower HBM channels accessible over address region 1",
                     "minimum": 0
                 },
+                "model": {
+                    "type": "string",
+                    "description": "Type of HBM model to use. DRAMSys or Ideal.",
+                    "enum": [
+                        "DRAMSys",
+                        "Ideal"
+                    ],
+                    "default": "DRAMSys"
+                },
                 "cfg_regions": {
                     "properties": {
                         "top": {"$ref": "http://pulp-platform.org/occamy/address_range.schema.json"},
