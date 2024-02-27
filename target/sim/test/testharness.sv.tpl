@@ -9,6 +9,26 @@ module testharness import occamy_pkg::*; (
   input  logic        rst_ni
 );
 
+% if cfg["hbm"]["model"] == "DRAMSys":
+  import "DPI-C" function void dram_load_elf(input int dram_id, input longint dram_base_addr, input string app_path);
+
+  string binary;
+
+  initial begin
+    automatic int exit_code;
+    // Check if `BINARY` is defined
+    if (!$value$plusargs("BINARY=%s", binary)) begin
+      $error("BINARY not defined");
+    end else begin
+      // Wait for DRAM to be initialized
+        #1;
+      // Preload the binary
+      $display("Preloading binary %s", binary);
+      dram_load_elf(0, 64'h${format(cfg["hbm"]["address_0"], '012x')}, binary);
+    end
+  end
+% endif
+
   // verilog_lint: waive explicit-parameter-storage-type
   localparam RTCTCK = 30.518us; // 32.768 kHz
 
