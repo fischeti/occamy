@@ -177,7 +177,7 @@ FORCE:
 # Boot ROM #
 ############
 
-BOOTROM_TARGETS = test/bootrom.elf test/bootrom.dump test/bootrom.bin test/bootrom.memh
+BOOTROM_TARGETS = test/bootrom.elf test/bootrom.dump test/bootrom.bin
 
 .PHONY: bootrom clean-bootrom
 
@@ -192,8 +192,6 @@ test/bootrom.dump: test/bootrom.elf
 	riscv64-unknown-elf-objdump -D $< > $@
 test/bootrom.bin: test/bootrom.elf
 	riscv64-unknown-elf-objcopy -O binary $< $@
-test/bootrom.memh: test/bootrom.elf
-	riscv64-unknown-elf-objcopy -O verilog $< $@
 
 ###############
 # RTL sources #
