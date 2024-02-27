@@ -11,16 +11,6 @@ MEMORY
 
 SECTIONS
 {
-
-  .reserved :
-  {
-    . = ALIGN(8);
-    __eoc_addr$ = .;
-    QUAD(0);
-    __ret_addr$ = .;
-    QUAD(0);
-  } > DRAM
-
   /* The program code and data goes into DRAM */
   .appl :
   {
@@ -36,6 +26,9 @@ SECTIONS
     *(.data)
     *(.rodata .rodata.*)
   } > DRAM
+
+  /* HTIF section for FESVR */
+  .htif : { *(.htif) } > DRAM
 
   .bss (NOLOAD) :
   {
