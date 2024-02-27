@@ -539,7 +539,7 @@ clean-vlt: clean-work
 ${VSIM_BUILDDIR}/compile.vsim.tcl: $(VSIM_SOURCES) ${TB_SRCS} ${TB_CC_SOURCES} test/bootrom.bin | $(VSIM_BUILDDIR)
 	$(VLIB) $(dir $@)
 	${BENDER} script vsim ${VSIM_BENDER} --vlog-arg="${VLOG_FLAGS} -work $(dir $@) " > $@
-	echo '${VLOG} -work $(dir $@) $(TB_CC_SOURCES) -ccflags "$(TB_CC_FLAGS)"' >> $@
+	echo '${VLOG} -work $(dir $@) $(TB_CC_SOURCES) -cpppath $(CXX_PATH) -ccflags "$(TB_CC_FLAGS)"' >> $@
 	echo 'return 0' >> $@
 
 # Build compilation script and compile all sources for Questasim simulation
