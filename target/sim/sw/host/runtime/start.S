@@ -51,8 +51,10 @@ _start:
 # - a0: exit code
 _exit:
     # Return exit code
+    slli      a0, a0, 1
+    ori       a0, a0, 1
     la        t0, __ret_addr$
-    sw        a0, 0(t0) # exit_code
+    sw        a0, 0(t0) # (exit code << 1) | 1
     fence
     # Set EOC
     la        t0, __eoc_addr$
