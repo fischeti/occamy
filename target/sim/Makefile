@@ -113,11 +113,9 @@ VLT_FLAGS += --prof-cfuncs # Enable code profiling
 # DRAMSys configuration #
 #########################
 
-DRAMSYS_LIB ?= $(shell bender path dram_rtl_sim)/dramsys_lib
-VSIM_FLAGS  += -sv_lib $(DRAMSYS_LIB)/libsqlite3
-VSIM_FLAGS  += -sv_lib $(DRAMSYS_LIB)/libsystemc
-VSIM_FLAGS 	+= -sv_lib $(DRAMSYS_LIB)/libDRAMSysLibrary
-VSIM_FLAGS 	+= +DRAMSYS_RES=$(DRAMSYS_LIB)/resources/configs
+DRAMSYS_PATH ?= $(shell bender path dram_rtl_sim)/dramsys_lib
+include $(DRAMSYS_PATH)/build_dynlib_from_github_dramsys5/Makefile
+dramsys_lib: $(DRAMSYS_LIBS)
 
 ###############
 # C testbench #
