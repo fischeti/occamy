@@ -11,6 +11,7 @@ module testharness import occamy_pkg::*; (
 
 % if cfg["hbm"]["model"] == "DRAMSys":
   import "DPI-C" function void dram_load_elf(input int dram_id, input longint dram_base_addr, input string app_path);
+  import "DPI-C" function int check_symbol(int dram_id, string sym);
 
   string binary;
 
@@ -25,6 +26,15 @@ module testharness import occamy_pkg::*; (
       // Preload the binary
       $display("Preloading binary %s", binary);
       dram_load_elf(0, 64'h${format(cfg["hbm"]["address_0"], '012x')}, binary);
+      #200;
+      while ((exit_code = check_symbol(0, "tohost")) == 0) #100;
+      exit_code >>= 1;
+      if (exit_code > 0) begin
+        $error("[FAILURE] Finished with exit code %2d", exit_code);
+      end else begin
+        $info("[SUCCESS] Program finished successfully");
+      end
+      $finish;
     end
   end
 % endif
