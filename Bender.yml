@@ -31,7 +31,7 @@ dependencies:
   register_interface:     { git:  https://github.com/pulp-platform/register_interface.git, version: 0.3.8   }
   snitch_cluster:         { git:  git@github.com:fischeti/snitch_cluster.git,     rev:     no-fesvr }
   tech_cells_generic:     { git:  https://github.com/pulp-platform/tech_cells_generic.git, rev:     v0.2.11 }
-  dram_rtl_sim:           { git:  git@iis-git.ee.ethz.ch:bslk/axi-stream/dram_rtl_sim.git, rev: write_strobe_support }
+  dram_rtl_sim:           { git:  git@iis-git.ee.ethz.ch:bslk/axi-stream/dram_rtl_sim.git, rev: fischeti  }
 
 export_include_dirs:
   - hw/spm_interface/include
