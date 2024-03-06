@@ -137,7 +137,12 @@ module testharness import occamy_pkg::*; (
 
 % for i in range(nr_hbm_channels):
 % if cfg["hbm"]["model"] == "DRAMSys":
-  ${tb_dramsys_ch(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i), cfg["hbm"]["address_0"] + i * cfg["hbm"]["channel_size"])}
+% if i < cfg["hbm"]["nr_channels_address_0"]:
+<% base_addr = cfg["hbm"]["address_0"] + i * cfg["hbm"]["channel_size"] %>
+% else:
+<% base_addr = cfg["hbm"]["address_1"] + i * cfg["hbm"]["channel_size"] %>
+% endif
+  ${tb_dramsys_ch(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i), base_addr)}
 % else:
   ${tb_memory(hbm_xbar.__dict__["out_hbm_{}".format(i)], "hbm_channel_{}".format(i))}
 % endif
